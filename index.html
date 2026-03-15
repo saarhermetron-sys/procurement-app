@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>המלצות רכש – חומרי גלם</title>
+
+<!-- monday SDK -->
+<script src="https://cdn.jsdelivr.net/npm/monday-sdk-js/dist/main.js"></script>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ─────────────────────────────────────
+   DESIGN TOKENS
+───────────────────────────────────── */
+:root {
+  --bg:           #F5F4F0;
+  --surface:      #FFFFFF;
+  --surface-2:    #F0EEE9;
+  --surface-3:    #E8E6E0;
+  --border:       rgba(0,0,0,0.07);
+  --border-md:    rgba(0,0,0,0.13);
+  --text:         #1A1917;
+  --text-2:       #5C5A55;
+  --text-3:       #9B9892;
+  --red:          #C43E3E;
+  --red-bg:       #FEF1F1;
+  --red-border:   rgba(196,62,62,0.2);
+  --amber:        #B5730E;
+  --amber-bg:     #FDF4E4;
+  --amber-border: rgba(181,115,14,0.2);
+  --blue:         #2362A2;
+  --blue-bg:      #EDF3FC;
+  --blue-border:  rgba(35,98,162,0.2);
+  --green:        #2B7A49;
+  --green-bg:     #EDF8F2;
+  --green-border: rgba(43,122,73,0.2);
+  --radius-sm:    6px;
+  --radius:       9px;
+  --radius-lg:    13px;
+  --shadow:       0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* monday dark theme support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #1B1A18;
+    --surface:   #242320;
+    --surface-2: #2C2B28;
+    --surface-3: #343330;
+    --border:    rgba(255,255,255,0.07);
+    --border-md: rgba(255,255,255,0.13);
+    --text:      #F0EDE8;
+    --text-2:    #9B9892;
+    --text-3:    #6B6760;
+  }
+}
+
+/* ─────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'IBM Plex Sans Hebrew', 'Segoe UI', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  direction: rtl;
+}
+
+/* ─────────────────────────────────────
+   APP SHELL
+───────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-rows: 50px 1fr;
+  height: 100vh;
+}
+
+/* ─────────────────────────────────────
+   TOP BAR
+───────────────────────────────────── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px;
+  flex-shrink: 0;
+}
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-bars { display: flex; flex-direction: column; gap: 3px; }
+.logo-bar { height: 3px; border-radius: 2px; }
+.topbar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.topbar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border-md);
+}
+.topbar-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.topbar-right {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.last-updated {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ─────────────────────────────────────
+   MAIN CONTENT AREA
+───────────────────────────────────── */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ─────────────────────────────────────
+   STAT CARDS
+───────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  flex-shrink: 0;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s;
+}
+.stat:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon.gray  { background: var(--surface-2); }
+.stat-icon.red   { background: var(--red-bg); }
+.stat-icon.amber { background: var(--amber-bg); }
+.stat-icon.blue  { background: var(--blue-bg); }
+.stat-body {}
+.stat-num {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-num.red   { color: var(--red); }
+.stat-num.amber { color: var(--amber); }
+.stat-num.blue  { color: var(--blue); }
+.stat-lbl {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 1px;
+}
+
+/* ─────────────────────────────────────
+   TOOLBAR (filters + search)
+───────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.filter-lbl { font-size: 11px; color: var(--text-3); margin-left: 2px; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border-md);
+  border-radius: 20px;
+  padding: 4px 11px;
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--text-2);
+  font-family: inherit;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.pill:hover { background: var(--surface-2); color: var(--text); }
+.pill.active { background: var(--text); color: #fff; border-color: var(--text); }
+.pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.search-box {
+  margin-right: auto;
+  position: relative;
+}
+.search-box svg {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-3);
+}
+.search-box input {
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px 5px 30px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  width: 190px;
+  outline: none;
+  transition: border-color 0.1s;
+}
+.search-box input::placeholder { color: var(--text-3); }
+.search-box input:focus { border-color: var(--blue); }
+
+/* ─────────────────────────────────────
+   TABLE
+───────────────────────────────────── */
+.table-card {
+  flex: 1;
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.table-scroll { overflow: auto; flex: 1; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+colgroup col { }
+.col-mat   { width: 118px; }
+.col-desc  { width: auto;  }
+.col-stat  { width: 88px;  }
+.col-stock { width: 80px;  }
+.col-mo    { width: 90px;  }
+.col-open  { width: 96px;  }
+.col-cov   { width: 90px;  }
+.col-ph    { width: 56px;  }
+.col-risk  { width: 100px; }
+
+thead tr { position: sticky; top: 0; z-index: 2; }
+thead th {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-align: right;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.1s;
+}
+thead th:hover,
+thead th.active { color: var(--text); }
+thead th .sort-arrow { margin-right: 3px; font-size: 10px; }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.07s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface-2); }
+tbody tr.selected { background: var(--blue-bg); }
+tbody td {
+  padding: 9px 12px;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: -0.3px;
+}
+.desc-text { color: var(--text-2); font-size: 12px; }
+.num-cell { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ─────────────────────────────────────
+   BADGES
+───────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.badge.critical { background: var(--red-bg);   color: var(--red);   border-color: var(--red-border); }
+.badge.warning  { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+.badge.info     { background: var(--blue-bg);  color: var(--blue);  border-color: var(--blue-border); }
+.badge.ok       { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+
+/* ─────────────────────────────────────
+   RISK BAR
+───────────────────────────────────── */
+.risk-row { display: flex; align-items: center; gap: 6px; }
+.risk-track {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.risk-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.risk-score { font-size: 11px; color: var(--text-3); min-width: 20px; }
+
+/* ─────────────────────────────────────
+   DETAIL PANEL (slide-in from bottom)
+───────────────────────────────────── */
+.detail-panel {
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  box-shadow: var(--shadow);
+  display: none;
+  animation: slideUp 0.18s ease;
+}
+.detail-panel.open { display: block; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.detail-hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.detail-mat {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+}
+.detail-desc { font-size: 12px; color: var(--text-2); }
+.detail-close {
+  margin-right: auto;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--text-3);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: background 0.1s;
+}
+.detail-close:hover { background: var(--surface-2); }
+.detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.dcard {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+}
+.dcard-lbl {
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+.dcard-val { font-size: 16px; font-weight: 600; }
+.ph-section-lbl { font-size: 11px; color: var(--text-3); margin-bottom: 6px; }
+.ph-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.ph-tag {
+  background: var(--blue-bg);
+  color: var(--blue);
+  border: 1px solid var(--blue-border);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ─────────────────────────────────────
+   BUTTONS
+───────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border-md);
+  background: var(--surface);
+  color: var(--text);
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn-primary {
+  background: #1A1917;
+  color: #fff;
+  border-color: #1A1917;
+}
+.btn-primary:hover { background: #2D2C29; border-color: #2D2C29; }
+
+/* ─────────────────────────────────────
+   SPINNER
+───────────────────────────────────── */
+.spinner {
+  width: 14px; height: 14px;
+  border: 1.8px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  opacity: 0.7;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─────────────────────────────────────
+   EMPTY / ERROR STATES
+───────────────────────────────────── */
+.center-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 12px;
+  color: var(--text-3);
+  padding: 2rem;
+  text-align: center;
+}
+.center-state svg { opacity: 0.25; }
+.center-state p { font-size: 13px; max-width: 300px; }
+.center-state .hint { font-size: 11px; color: var(--text-3); }
+
+/* ─────────────────────────────────────
+   LOADING OVERLAY
+───────────────────────────────────── */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.loading-overlay.show { display: flex; }
+.loading-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border-md);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.loading-text { font-size: 13px; color: var(--text-2); }
+.loading-sub  { font-size: 11px; color: var(--text-3); }
+
+/* ─────────────────────────────────────
+   SCROLLBARS
+───────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* ─────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────── */
+@media (max-width: 860px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .detail-metrics { grid-template-columns: repeat(3, 1fr); }
+  .col-open, .col-cov { width: 78px; }
+  .col-ph { width: 44px; }
+}
+@media (max-width: 600px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .col-open, .col-mo { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">טוען נתונים...</div>
+  <div class="loading-sub" id="loadingSub"></div>
+</div>
+
+<!-- App Shell -->
+<div class="app">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-bars">
+        <div class="logo-bar" style="width:20px;background:var(--blue);"></div>
+        <div class="logo-bar" style="width:14px;background:var(--amber);"></div>
+        <div class="logo-bar" style="width:17px;background:var(--red);"></div>
+      </div>
+      <span class="topbar-title">המלצות רכש</span>
+    </div>
+    <div class="topbar-sep"></div>
+    <span class="topbar-sub">חומרי גלם</span>
+    <div class="topbar-right">
+      <span class="last-updated" id="lastUpdated"></span>
+      <button class="btn btn-primary" id="refreshBtn" onclick="loadAllData()">
+        <span id="refreshIco">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M1.3 6.5C1.3 3.63 3.63 1.3 6.5 1.3C7.96 1.3 9.28 1.9 10.22 2.88L9.1 2.88" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M11.7 6.5C11.7 9.37 9.37 11.7 6.5 11.7C5.04 11.7 3.72 11.1 2.78 10.12L3.9 10.12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M10.22 1L10.22 3.6L7.62 3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2.78 12L2.78 9.4L5.38 9.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span id="refreshTxt">טען נתונים</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main" id="mainArea">
+    <!-- Placeholder -->
+    <div class="center-state" id="placeholder">
+      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+        <rect x="6" y="10" width="40" height="32" rx="4" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="6" y1="20" x2="46" y2="20" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="18" y1="20" x2="18" y2="42" stroke="currentColor" stroke-width="1"/>
+        <line x1="32" y1="20" x2="32" y2="42" stroke="currentColor" stroke-width="1"/>
+        <circle cx="38" cy="38" r="8" fill="currentColor" opacity="0.07"/>
+        <path d="M38 34V38L41 40" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <p>לחץ על "טען נתונים" לקבלת המלצות רכש עדכניות</p>
+      <span class="hint">האפליקציה מנתחת מלאי, ביקוש היסטורי, הזמנות פתוחות וצפי עתידי</span>
+    </div>
+  </main>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════ */
+const CFG = {
+  STOCK: 2064678025,
+  BOXES: 1938972338,
+  ERP:   5092696509,
+  TAPI:  1657396625
+};
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let monday;
+let allData      = [];
+let selectedId   = null;
+let activeFilter = 'all';
+let searchTerm   = '';
+let sortCol      = 'risk';
+let sortDir      = 'desc';
+let settings     = {};
+
+/* ════════════════════════════════════════
+   MONDAY SDK INIT
+════════════════════════════════════════ */
+function initSDK() {
+  try {
+    monday = window.mondaySdk ? window.mondaySdk() : null;
+    if (!monday) return;
+    monday.setApiVersion('2024-01');
+    monday.listen('settings', res => {
+      if (res && res.data) {
+        settings = res.data;
+        Object.assign(CFG, {
+          STOCK: parseInt(settings.stockBoardId) || CFG.STOCK,
+          BOXES: parseInt(settings.boxesBoardId) || CFG.BOXES,
+          ERP:   parseInt(settings.erpBoardId)   || CFG.ERP,
+          TAPI:  parseInt(settings.tapiBoardId)  || CFG.TAPI
+        });
+      }
+    });
+    monday.listen('context', res => { if (res && res.data) loadAllData(); });
+  } catch(e) { console.warn('monday SDK init:', e); }
+}
+
+/* ════════════════════════════════════════
+   API
+════════════════════════════════════════ */
+async function gql(query) {
+  if (monday) {
+    const res = await monday.api(query);
+    if (res.errors) throw new Error(res.errors[0].message);
+    return res.data;
+  }
+  const token = window.MONDAY_TOKEN || '';
+  const res = await fetch('https://api.monday.com/v2', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token,
+      'API-Version':   '2024-01'
+    },
+    body: JSON.stringify({ query })
+  });
+  const json = await res.json();
+  if (json.errors) throw new Error(json.errors[0].message);
+  return json.data;
+}
+
+function colText(item, colId) {
+  const cv = (item.column_values || []).find(c => c.id === colId);
+  if (!cv) return '';
+  if (cv.text && cv.text.trim()) return cv.text.trim();
+  return '';
+}
+function colNum(item, colId) { return parseFloat(colText(item, colId)) || 0; }
+
+/* Fetch all pages of items_page for a board */
+async function fetchAllItems(boardId, colIds, withSubs) {
+  const colQ = colIds.length ? `(ids: [${colIds.map(c=>`"${c}"`).join(',')}])` : '';
+  const subQ = withSubs
+    ? `subitems { id name column_values { id text } }`
+    : '';
+
+  let items = [], cursor = null, first = true;
+  while (first || cursor) {
+    first = false;
+    let q;
+    if (!cursor) {
+      q = `{ boards(ids: ${boardId}) { items_page(limit: 500) {
+        cursor
+        items { id name column_values${colQ} { id text } ${subQ} }
+      }}}`;
+    } else {
+      q = `{ next_items_page(limit: 500, cursor: "${cursor}") {
+        cursor
+        items { id name column_values${colQ} { id text } ${subQ} }
+      }}`;
+    }
+    const data = await gql(q);
+    const page = cursor
+      ? data.next_items_page
+      : data.boards[0].items_page;
+    if (!page) break;
+    items = items.concat(page.items);
+    cursor = page.cursor || null;
+  }
+  return items;
+}
+
+/* ════════════════════════════════════════
+   LOADING UI
+════════════════════════════════════════ */
+function setLoading(show, text = '', sub = '') {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.toggle('show', show);
+  if (show) {
+    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingSub').textContent  = sub;
+  }
+}
+
+/* ════════════════════════════════════════
+   MAIN LOAD + PROCESS
+════════════════════════════════════════ */
+async function loadAllData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  document.getElementById('refreshIco').innerHTML = '<div class="spinner"></div>';
+  document.getElementById('refreshTxt').textContent = 'טוען...';
+  document.getElementById('placeholder') && (document.getElementById('placeholder').style.display = 'none');
+
+  try {
+    setLoading(true, 'טוען נתוני מלאי...', `Board: Stock 01`);
+    const stockItems = await fetchAllItems(CFG.STOCK, ['numeric_mkxaxkky','text_mkv0b0pv'], false);
+
+    setLoading(true, 'טוען מקטים ורכיבים...', `Board: Boxes Position-WorkFlow`);
+    const boxItems = await fetchAllItems(CFG.BOXES, [], true);
+
+    setLoading(true, 'טוען היסטוריית אספקות...', `Board: TAPI ERP`);
+    const erpItems = await fetchAllItems(CFG.ERP, ['text_mm18p6je','numeric_mm1493hn','date_mm16w82g'], false);
+
+    setLoading(true, 'טוען הזמנות פתוחות...', `Board: TAPI`);
+    const tapiItems = await fetchAllItems(CFG.TAPI, ['numeric_mkt4mhkb'], false);
+
+    setLoading(true, 'מחשב ניתוח סיכונים...', '');
+    allData = processData(stockItems, boxItems, erpItems, tapiItems);
+
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent =
+      'עודכן ' + now.toLocaleDateString('he-IL') + ' · ' + now.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+    render();
+  } catch(err) {
+    console.error(err);
+    showError(err.message);
+  } finally {
+    setLoading(false);
+    btn.disabled = false;
+    document.getElementById('refreshIco').innerHTML = refreshSVG();
+    document.getElementById('refreshTxt').textContent = 'רענן';
+  }
+}
+
+function refreshSVG() {
+  return `<svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+    <path d="M1.3 6.5C1.3 3.63 3.63 1.3 6.5 1.3C7.96 1.3 9.28 1.9 10.22 2.88L9.1 2.88" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M11.7 6.5C11.7 9.37 9.37 11.7 6.5 11.7C5.04 11.7 3.72 11.1 2.78 10.12L3.9 10.12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M10.22 1L10.22 3.6L7.62 3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M2.78 12L2.78 9.4L5.38 9.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+/* ════════════════════════════════════════
+   DATA PROCESSING
+════════════════════════════════════════ */
+function processData(stockItems, boxItems, erpItems, tapiItems) {
+  /* 1. Stock map: matId → { qty, desc } */
+  const stockMap = {};
+  for (const it of stockItems) {
+    stockMap[it.name] = {
+      qty:  colNum(it, 'numeric_mkxaxkky'),
+      desc: colText(it, 'text_mkv0b0pv')
+    };
+  }
+
+  /* 2. PH demand map: matId → [{ ph, qtyPer }] */
+  const phDemand = {};
+  for (const box of boxItems) {
+    const ph = box.name;
+    for (const sub of (box.subitems || [])) {
+      const matId  = sub.name;
+      const qtyPer = parseFloat((sub.column_values || [])
+        .find(c => c.id === 'numeric_mkthehna')?.text) || 0;
+      if (!phDemand[matId]) phDemand[matId] = [];
+      phDemand[matId].push({ ph, qtyPer });
+    }
+  }
+
+  /* 3. ERP history: ph → { qtys[], dates[] } */
+  const erpMap = {};
+  for (const it of erpItems) {
+    const ph  = colText(it, 'text_mm18p6je');
+    const qty = colNum(it,  'numeric_mm1493hn');
+    const ds  = colText(it, 'date_mm16w82g');
+    if (!ph) continue;
+    if (!erpMap[ph]) erpMap[ph] = { qtys: [], dates: [] };
+    erpMap[ph].qtys.push(qty);
+    if (ds) erpMap[ph].dates.push(new Date(ds));
+  }
+
+  /* 4. Yearly average per PH */
+  const phYearly = {};
+  for (const ph in erpMap) {
+    const { qtys, dates } = erpMap[ph];
+    const total = qtys.reduce((a, b) => a + b, 0);
+    let years = 1;
+    if (dates.length >= 2) {
+      const span = Math.max(...dates.map(d => d.getTime()))
+                 - Math.min(...dates.map(d => d.getTime()));
+      years = Math.max(1, span / (365.25 * 864e5));
+    }
+    phYearly[ph] = total / years;
+  }
+
+  /* 5. Open orders: ph → total qty */
+  const openOrders = {};
+  for (const it of tapiItems) {
+    const ph  = it.name;
+    const qty = colNum(it, 'numeric_mkt4mhkb');
+    if (!openOrders[ph]) openOrders[ph] = 0;
+    openOrders[ph] += qty;
+  }
+
+  /* 6. Build result per material */
+  const results = [];
+  for (const matId in stockMap) {
+    const { qty: stock, desc } = stockMap[matId];
+    const links = phDemand[matId] || [];
+
+    let totalYearly = 0, totalOpen = 0;
+    const phSet = new Set();
+
+    for (const { ph, qtyPer } of links) {
+      totalYearly += (phYearly[ph] || 0) * qtyPer;
+      totalOpen   += (openOrders[ph] || 0) * qtyPer;
+      phSet.add(ph);
+    }
+
+    const monthly = totalYearly / 12;
+    const cover   = monthly > 0 ? stock / monthly : 999;
+
+    /* Risk score */
+    let risk = 0;
+    if      (cover < 1)  risk += 60;
+    else if (cover < 3)  risk += 35;
+    else if (cover < 6)  risk += 15;
+    if      (stock < totalOpen)       risk += 40;
+    else if (stock < totalOpen * 1.5) risk += 20;
+    if (totalYearly === 0) risk = Math.min(risk, 8);
+    risk = Math.min(100, risk);
+
+    const level =
+      risk >= 60 ? 'critical' :
+      risk >= 30 ? 'warning'  :
+      risk >= 10 ? 'info'     : 'ok';
+
+    results.push({
+      matId, desc, stock,
+      monthly:   roundN(monthly, 1),
+      yearly:    Math.round(totalYearly),
+      openDemand: roundN(totalOpen, 1),
+      cover:     cover >= 999 ? 999 : roundN(cover, 1),
+      risk,
+      level,
+      phs:     [...phSet],
+      phCount: links.length
+    });
+  }
+
+  return results;
+}
+
+function roundN(n, dp) {
+  const m = Math.pow(10, dp);
+  return Math.round(n * m) / m;
+}
+
+/* ════════════════════════════════════════
+   FILTERED + SORTED VIEW
+════════════════════════════════════════ */
+function getView() {
+  let d = allData.filter(r => {
+    if (activeFilter === 'critical') return r.level === 'critical';
+    if (activeFilter === 'warning')  return r.level === 'critical' || r.level === 'warning';
+    if (activeFilter === 'demand')   return r.yearly > 0;
+    return true;
+  });
+  if (searchTerm) {
+    const s = searchTerm.toLowerCase();
+    d = d.filter(r =>
+      r.matId.toLowerCase().includes(s) ||
+      r.desc.toLowerCase().includes(s)
+    );
+  }
+  d.sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (typeof av === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    if (sortDir === 'asc') return av > bv ? 1 : av < bv ? -1 : 0;
+    return av < bv ? 1 : av > bv ? -1 : 0;
+  });
+  return d;
+}
+
+/* ════════════════════════════════════════
+   RENDER
+════════════════════════════════════════ */
+const LEVEL_LABEL = { critical:'קריטי', warning:'אזהרה', info:'שים לב', ok:'תקין' };
+const LEVEL_COLOR = { critical:'var(--red)', warning:'var(--amber)', info:'var(--blue)', ok:'var(--green)' };
+
+function thHtml(label, col, extraClass = '') {
+  const active = sortCol === col ? 'active' : '';
+  const arrow  = sortCol === col ? `<span class="sort-arrow">${sortDir === 'asc' ? '↑' : '↓'}</span>` : '';
+  return `<th class="${active} ${extraClass}" onclick="setSort('${col}')">${arrow}${label}</th>`;
+}
+
+function fmtCover(r) {
+  if (r.monthly <= 0) return '—';
+  if (r.cover === 999) return '∞';
+  return r.cover + ' חו\'';
+}
+
+function render() {
+  const view = getView();
+  const n    = allData.length;
+  const crit = allData.filter(r => r.level === 'critical').length;
+  const warn = allData.filter(r => r.level === 'warning').length;
+  const dem  = allData.filter(r => r.yearly > 0).length;
+  const sel  = allData.find(r => r.matId === selectedId);
+
+  let html = `
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-icon gray">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="2" y="2" width="14" height="14" rx="2" stroke="var(--text-2)" stroke-width="1.3"/>
+          <line x1="2" y1="7" x2="16" y2="7" stroke="var(--text-2)" stroke-width="1"/>
+          <line x1="7" y1="7" x2="7" y2="16" stroke="var(--text-2)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="stat-body"><div class="stat-num">${n}</div><div class="stat-lbl">סה"כ חומרי גלם</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon red">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="9" r="7" stroke="var(--red)" stroke-width="1.3"/>
+          <line x1="9" y1="5.5" x2="9" y2="10" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="9" cy="12.5" r="0.8" fill="var(--red)"/>
+        </svg>
+      </div>
+      <div class="stat-body"><div class="stat-num red">${crit}</div><div class="stat-lbl">מחסור קריטי</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon amber">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 3L15.5 14.5H2.5L9 3Z" stroke="var(--amber)" stroke-width="1.3" stroke-linejoin="round"/>
+          <line x1="9" y1="8" x2="9" y2="11.5" stroke="var(--amber)" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="9" cy="13" r="0.7" fill="var(--amber)"/>
+        </svg>
+      </div>
+      <div class="stat-body"><div class="stat-num amber">${warn}</div><div class="stat-lbl">דורש תשומת לב</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon blue">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 13L7 9L10 12L15 6" stroke="var(--blue)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="stat-body"><div class="stat-num blue">${dem}</div><div class="stat-lbl">עם ביקוש פעיל</div></div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span class="filter-lbl">הצג:</span>
+    <button class="pill ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">הכל (${n})</button>
+    <button class="pill ${activeFilter==='critical'?'active':''}" onclick="setFilter('critical')">
+      <span class="dot" style="background:var(--red)"></span>קריטי (${crit})
+    </button>
+    <button class="pill ${activeFilter==='warning'?'active':''}" onclick="setFilter('warning')">
+      <span class="dot" style="background:var(--amber)"></span>אזהרה+ (${crit+warn})
+    </button>
+    <button class="pill ${activeFilter==='demand'?'active':''}" onclick="setFilter('demand')">
+      <span class="dot" style="background:var(--blue)"></span>ביקוש פעיל (${dem})
+    </button>
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.3" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="9.5" y1="9.5" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <input type="text" placeholder='חיפוש מק"ט / תיאור...'
+        value="${escHtml(searchTerm)}"
+        oninput="setSearch(this.value)">
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-scroll">
+      <table>
+        <colgroup>
+          <col class="col-mat"><col class="col-desc"><col class="col-stat">
+          <col class="col-stock"><col class="col-mo"><col class="col-open">
+          <col class="col-cov"><col class="col-ph"><col class="col-risk">
+        </colgroup>
+        <thead><tr>
+          ${thHtml('מק"ט', 'matId')}
+          ${thHtml('תיאור', 'desc')}
+          <th>סטטוס</th>
+          ${thHtml('מלאי', 'stock')}
+          ${thHtml('ביקוש חודשי', 'monthly')}
+          ${thHtml('חשיפה פתוחה', 'openDemand')}
+          ${thHtml('כיסוי', 'cover')}
+          ${thHtml('PH', 'phCount')}
+          ${thHtml('סיכון', 'risk')}
+        </tr></thead>
+        <tbody>`;
+
+  for (const r of view) {
+    const isSel = r.matId === selectedId;
+    const barColor = LEVEL_COLOR[r.level];
+    html += `
+    <tr class="${isSel?'selected':''}" onclick="selectRow('${escHtml(r.matId)}')">
+      <td class="mono">${escHtml(r.matId)}</td>
+      <td class="desc-text" title="${escHtml(r.desc)}">${escHtml(r.desc) || '—'}</td>
+      <td><span class="badge ${r.level}">${LEVEL_LABEL[r.level]}</span></td>
+      <td class="num-cell">${r.stock.toLocaleString('he-IL')}</td>
+      <td class="num-cell">${r.monthly > 0 ? r.monthly.toLocaleString('he-IL') : '—'}</td>
+      <td class="num-cell">${r.openDemand > 0 ? r.openDemand.toLocaleString('he-IL') : '—'}</td>
+      <td class="num-cell">${fmtCover(r)}</td>
+      <td style="text-align:center">${r.phCount}</td>
+      <td>
+        <div class="risk-row">
+          <div class="risk-track">
+            <div class="risk-fill" style="width:${r.risk}%;background:${barColor}"></div>
+          </div>
+          <span class="risk-score">${r.risk}</span>
+        </div>
+      </td>
+    </tr>`;
+  }
+
+  html += `</tbody></table>
+    ${view.length === 0 ? '<div style="padding:2rem;text-align:center;color:var(--text-3);font-size:13px;">אין תוצאות</div>' : ''}
+  </div></div>`;
+
+  /* Detail Panel */
+  html += `<div class="detail-panel ${sel?'open':''}">`;
+  if (sel) {
+    html += `
+    <div class="detail-hdr">
+      <span class="detail-mat">${escHtml(sel.matId)}</span>
+      <span class="detail-desc">${escHtml(sel.desc)}</span>
+      <span class="badge ${sel.level}" style="margin-right:auto">${LEVEL_LABEL[sel.level]}</span>
+      <button class="detail-close" onclick="selectRow('${escHtml(sel.matId)}')" title="סגור">✕</button>
+    </div>
+    <div class="detail-metrics">
+      <div class="dcard"><div class="dcard-lbl">מלאי נוכחי</div><div class="dcard-val">${sel.stock.toLocaleString('he-IL')}</div></div>
+      <div class="dcard"><div class="dcard-lbl">ביקוש חודשי</div><div class="dcard-val">${sel.monthly > 0 ? sel.monthly.toLocaleString('he-IL') : '—'}</div></div>
+      <div class="dcard"><div class="dcard-lbl">ביקוש שנתי</div><div class="dcard-val">${sel.yearly > 0 ? sel.yearly.toLocaleString('he-IL') : '—'}</div></div>
+      <div class="dcard"><div class="dcard-lbl">חשיפה הזמנות</div><div class="dcard-val">${sel.openDemand > 0 ? sel.openDemand.toLocaleString('he-IL') : '—'}</div></div>
+      <div class="dcard"><div class="dcard-lbl">כיסוי (חו')</div><div class="dcard-val">${fmtCover(sel)}</div></div>
+      <div class="dcard"><div class="dcard-lbl">ציון סיכון</div><div class="dcard-val" style="color:${LEVEL_COLOR[sel.level]}">${sel.risk}/100</div></div>
+    </div>
+    <div class="ph-section-lbl">משמש ב-${sel.phs.length} מקטים (PH):</div>
+    <div class="ph-tags">${sel.phs.map(p => `<span class="ph-tag">${escHtml(p)}</span>`).join('')}</div>`;
+  }
+  html += `</div>`;
+
+  document.getElementById('mainArea').innerHTML = html;
+}
+
+function showError(msg) {
+  document.getElementById('mainArea').innerHTML = `
+    <div class="center-state">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="20" y1="13" x2="20" y2="22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="20" cy="27" r="1.2" fill="currentColor"/>
+      </svg>
+      <p>שגיאה בטעינת הנתונים</p>
+      <span class="hint">${escHtml(msg)}</span>
+      <button class="btn" onclick="loadAllData()">נסה שנית</button>
+    </div>`;
+}
+
+/* ════════════════════════════════════════
+   INTERACTION HANDLERS
+════════════════════════════════════════ */
+function setFilter(f)    { activeFilter = f; selectedId = null; render(); }
+function setSearch(v)    { searchTerm = v; render(); }
+function selectRow(id)   { selectedId = selectedId === id ? null : id; render(); }
+function setSort(col) {
+  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = col; sortDir = 'desc'; }
+  render();
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ════════════════════════════════════════
+   BOOT
+════════════════════════════════════════ */
+initSDK();
+</script>
+</body>
+</html>
